@@ -586,10 +586,22 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
                                 : "col-span-7 rounded-b-lg px-6 py-2.5 text-xs text-slate-600"
                             }
                           >
-                            <span className="font-semibold text-slate-500">
-                              Followup:
-                            </span>{" "}
-                            &quot;{lead.latestFollowupNotes}&quot;
+                            <div className="space-y-1">
+                              <p>
+                                <span className="font-semibold text-slate-500">
+                                  Followup:
+                                </span>{" "}
+                                &quot;{lead.latestFollowupNotes}&quot;
+                              </p>
+                              <p className="text-[11px] text-slate-400">
+                                {lead.latestFollowupDate
+                                  ? `Date: ${new Intl.DateTimeFormat("en-GB", {
+                                      day: "2-digit",
+                                      month: "short",
+                                    }).format(new Date(lead.latestFollowupDate))}`
+                                  : "Date: —"}
+                              </p>
+                            </div>
                           </TableCell>
                         </TableRow>
                       )}

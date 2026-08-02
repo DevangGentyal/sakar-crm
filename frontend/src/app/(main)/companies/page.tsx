@@ -28,6 +28,7 @@ export default function CompaniesPage() {
   const [form, setForm] = useState({
     companyName: "",
     companyCode: "",
+    companyType: "",
     email: "",
     companyMobile: "",
     address: "",
@@ -65,6 +66,7 @@ export default function CompaniesPage() {
     await createMutation.mutateAsync({
       companyName: form.companyName,
       companyCode: form.companyCode,
+      companyType: form.companyType,
       email: form.email,
       mobile: form.companyMobile || undefined,
       address: form.address || undefined,
@@ -80,6 +82,7 @@ export default function CompaniesPage() {
     setForm({
       companyName: "",
       companyCode: "",
+      companyType: "",
       email: "",
       companyMobile: "",
       address: "",
@@ -126,6 +129,26 @@ export default function CompaniesPage() {
               required
               helperText="Unique short code, e.g. ACME"
             />
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Company Type
+              </label>
+              <select
+                value={form.companyType}
+                onChange={(e) =>
+                  setForm({ ...form, companyType: e.target.value })
+                }
+                required
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-slate-400 focus:outline-none"
+              >
+                <option value="">Select company type</option>
+                <option value="realestate">Real Estate</option>
+                <option value="hospital">Hospital</option>
+                <option value="hotel">Hotel</option>
+                <option value="clothing">Clothing</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
             <Input
               label="Company Email"
               type="email"
@@ -267,6 +290,9 @@ export default function CompaniesPage() {
                       </div>
                       <p className="mt-1 text-xs text-slate-500 font-mono">
                         {company.company_code}
+                      </p>
+                      <p className="mt-1 text-sm text-slate-600">
+                        Type: {company.company_type || "—"}
                       </p>
                       <p className="mt-1 text-sm text-slate-600">
                         {company.email || "—"}

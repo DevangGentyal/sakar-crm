@@ -113,6 +113,7 @@ export const companyService = {
   create: async (input: {
     companyName: string;
     companyCode: string;
+    companyType: string;
     email: string;
     mobile?: string;
     address?: string;

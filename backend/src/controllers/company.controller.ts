@@ -49,6 +49,7 @@ export async function createCompanyHandler(
     const body = req.body as {
       companyName: string;
       companyCode: string;
+      companyType: string;
       email: string;
       mobile?: string;
       address?: string;

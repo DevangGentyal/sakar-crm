@@ -127,6 +127,12 @@ const formatCallDuration = (duration?: number | null): string => {
 
 const EMPTY_ARRAY: never[] = [];
 
+const isToday = (value: string): boolean => {
+  const date = new Date(value);
+  const today = new Date();
+  return date.toDateString() === today.toDateString();
+};
+
 // ─── Sub Components ────────────────────────────────────────────────────────────
 
 interface InfoItemProps {
@@ -1029,7 +1035,7 @@ export default function LeadDetailsPage() {
                 />
               </label>
               <label className="text-xs font-medium text-slate-500">
-                Notes
+                Notes for follow-up on {followupDate ? formatDate(followupDate) : "the selected date"}
                 <input
                   value={followupNotes}
                   onChange={(event) => setFollowupNotes(event.target.value)}
@@ -1046,19 +1052,28 @@ export default function LeadDetailsPage() {
               </button>
             </form>
             <div className="space-y-3">
-              {displayFollowups.map((followup) => (
-                <div
-                  key={followup.id}
-                  className={`rounded-lg border border-slate-100 bg-slate-50 px-4 py-3 transition-all duration-300 ease-out ${
-                    animatingFollowupId === followup.id ? "shadow-sm" : ""
-                  }`}
-                  style={{
-                    animation:
-                      animatingFollowupId === followup.id
-                        ? "followupCardSlide 0.35s ease-out"
-                        : undefined,
-                  }}
-                >
+              {displayFollowups.map((followup) => {
+                const shouldHighlight =
+                  isToday(followup.followupDate) &&
+                  (followup.status ?? "").toUpperCase() !== "BOOKED";
+
+                return (
+                  <div
+                    key={followup.id}
+                    className={`rounded-lg border px-4 py-3 transition-all duration-300 ease-out ${
+                      animatingFollowupId === followup.id ? "shadow-sm" : ""
+                    } ${
+                      shouldHighlight
+                        ? "border-rose-200 bg-rose-50 ring-1 ring-rose-200"
+                        : "border-slate-100 bg-slate-50"
+                    }`}
+                    style={{
+                      animation:
+                        animatingFollowupId === followup.id
+                          ? "followupCardSlide 0.35s ease-out"
+                          : undefined,
+                    }}
+                  >
                   {/* <div className="flex items-center justify-between gap-3">
                     <span className="text-sm font-semibold text-slate-700">
                       {formatDate(followup.followupDate)}
@@ -1118,8 +1133,9 @@ export default function LeadDetailsPage() {
                       Call this follow-up
                     </button>
                   </div>
-                </div>
-              ))}
+                  </div>
+                );
+              })}
 
               {displayFollowups.length === 0 && (
                 <p className="text-sm text-slate-400">

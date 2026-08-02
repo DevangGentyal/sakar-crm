@@ -55,6 +55,7 @@ export interface Company {
   id: string;
   company_name: string;
   company_code: string;
+  company_type: string | null;
   email: string | null;
   mobile: string | null;
   address: string | null;

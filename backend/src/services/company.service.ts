@@ -20,6 +20,7 @@ export async function getPublicCompanies() {
 export async function createCompanyWithAdminAccount(input: {
   companyName: string;
   companyCode: string;
+  companyType: string;
   email: string;
   mobile?: string | null;
   address?: string | null;

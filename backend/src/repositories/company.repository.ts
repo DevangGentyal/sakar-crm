@@ -5,6 +5,7 @@ export interface CompanyRow {
   id: string;
   company_name: string;
   company_code: string;
+  company_type: string | null;
   email: string | null;
   mobile: string | null;
   address: string | null;
@@ -27,7 +28,7 @@ export async function listCompanies(): Promise<CompanyRow[]> {
 
 export async function listPublicCompanies(): Promise<CompanyRow[]> {
   const result = await query<CompanyRow>(
-    `SELECT id, company_name, company_code, email, mobile, address, logo_url, theme, status, created_at, updated_at
+    `SELECT id, company_name, company_code, company_type, email, mobile, address, logo_url, theme, status, created_at, updated_at
      FROM companies
      WHERE status = 'ACTIVE'
      ORDER BY company_name ASC`,
@@ -38,6 +39,7 @@ export async function listPublicCompanies(): Promise<CompanyRow[]> {
 export async function createCompany(input: {
   companyName: string;
   companyCode: string;
+  companyType: string;
   email?: string | null;
   mobile?: string | null;
   address?: string | null;
@@ -47,12 +49,13 @@ export async function createCompany(input: {
 }): Promise<CompanyRow> {
   const result = await query<CompanyRow>(
     `INSERT INTO companies (
-       company_name, company_code, email, mobile, address, logo_url, theme, registration_password_hash, status
-     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'ACTIVE')
+       company_name, company_code, company_type, email, mobile, address, logo_url, theme, registration_password_hash, status
+     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'ACTIVE')
      RETURNING *`,
     [
       input.companyName,
       input.companyCode,
+      input.companyType,
       input.email ?? null,
       input.mobile ?? null,
       input.address ?? null,
@@ -124,6 +127,7 @@ export async function resetAdminPassword(
 export async function createCompanyWithAdmin(input: {
   companyName: string;
   companyCode: string;
+  companyType: string;
   email: string;
   mobile?: string | null;
   address?: string | null;
@@ -138,6 +142,7 @@ export async function createCompanyWithAdmin(input: {
   const company = await createCompany({
     companyName: input.companyName,
     companyCode: input.companyCode,
+    companyType: input.companyType,
     email: input.email,
     mobile: input.mobile,
     address: input.address,

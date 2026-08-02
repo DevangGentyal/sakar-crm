@@ -44,7 +44,6 @@ export const EditLeadDialog: React.FC<EditLeadDialogProps> = ({
   const updateMutation = useUpdateLead();
   const { data: currentUser } = useCurrentUser();
   const [selectedPhoto, setSelectedPhoto] = React.useState<File | null>(null);
-  const [removePhoto, setRemovePhoto] = React.useState(false);
   const [photoPreview, setPhotoPreview] = React.useState<string | null>(
     lead.photoUrl ?? null,
   );
@@ -73,7 +72,6 @@ export const EditLeadDialog: React.FC<EditLeadDialogProps> = ({
       });
       setPhotoPreview(lead.photoUrl ?? null);
       setSelectedPhoto(null);
-      setRemovePhoto(false);
     }
   }, [isOpen, lead, reset]);
 
@@ -88,9 +86,7 @@ export const EditLeadDialog: React.FC<EditLeadDialogProps> = ({
     try {
       const photoUrl = selectedPhoto
         ? (await leadService.uploadLeadPhoto(selectedPhoto)).path
-        : removePhoto
-          ? null
-          : undefined;
+        : undefined;
       await updateMutation.mutateAsync({
         id: lead.id,
         input: { ...(data as UpdateLeadFormData), photoUrl } as any,
@@ -205,7 +201,6 @@ export const EditLeadDialog: React.FC<EditLeadDialogProps> = ({
             accept="image/jpeg,image/jpg,image/png,image/webp"
             onChange={(event) => {
               setSelectedPhoto(event.target.files?.[0] ?? null);
-              setRemovePhoto(false);
             }}
             className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-slate-800"
           />
@@ -221,20 +216,6 @@ export const EditLeadDialog: React.FC<EditLeadDialogProps> = ({
                 No photo
               </div>
             )}
-            <div className="flex flex-col gap-2">
-              <Button
-                type="button"
-                variant="destructive"
-                size="sm"
-                onClick={() => {
-                  setSelectedPhoto(null);
-                  setPhotoPreview(null);
-                  setRemovePhoto(true);
-                }}
-              >
-                Remove photo
-              </Button>
-            </div>
           </div>
         </div>
         {/* <Input
