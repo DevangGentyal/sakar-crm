@@ -49,6 +49,8 @@ export function getApiErrorMessage(
           return "No changes were detected. Update at least one field.";
         case "TERMINAL_STATE":
           return "This lead can no longer be updated because it is in a final state.";
+        case "EXECUTIVE_MOBILE_MISSING":
+          return "Your account does not have a mobile number configured for calling.";
         case "FILE_TYPE_NOT_ALLOWED":
           return "Only JPG, JPEG, PNG, and WEBP files are allowed.";
         case "PAYLOAD_TOO_LARGE":

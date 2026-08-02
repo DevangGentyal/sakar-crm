@@ -56,6 +56,7 @@ import {
   formatDate,
   formatRelativeTime,
 } from "@/src/utils/helpers";
+import { getApiErrorMessage } from "@/src/utils/api-error";
 import { EditLeadDialog } from "@/src/components/leads/EditLeadDialog";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -123,6 +124,8 @@ const formatCallDuration = (duration?: number | null): string => {
 
   return `${minutes}m ${seconds}s`;
 };
+
+const EMPTY_ARRAY: never[] = [];
 
 // ─── Sub Components ────────────────────────────────────────────────────────────
 
@@ -597,12 +600,13 @@ export default function LeadDetailsPage() {
   const [animatingFollowupId, setAnimatingFollowupId] = useState<string | null>(
     null,
   );
+  const [callActionError, setCallActionError] = useState<string | null>(null);
   const refreshTimerRef = useRef<number | null>(null);
 
   const { data, isLoading, isError, refetch } = useLeadDetails(id);
-  const { data: followups = [], refetch: refetchFollowups } =
+  const { data: followupsData, refetch: refetchFollowups } =
     useLeadFollowups(id);
-  const { data: calls = [], refetch: refetchCalls } = useLeadCalls(id, {
+  const { data: callsData, refetch: refetchCalls } = useLeadCalls(id, {
     refetchInterval: (query) => {
       const items = (query.state.data as LeadCall[] | undefined) ?? [];
       const shouldPoll = items.some((call) => {
@@ -624,6 +628,8 @@ export default function LeadDetailsPage() {
 
   const lead = data?.lead;
   const history = data?.history ?? [];
+  const followups = followupsData ?? EMPTY_ARRAY;
+  const calls = callsData ?? EMPTY_ARRAY;
 
   useEffect(() => {
     setCallNotesDrafts((current) => {
@@ -680,11 +686,21 @@ export default function LeadDetailsPage() {
 
   const handleInitiateCall = async (followupId?: string | null) => {
     setSelectedFollowupForCall(followupId ?? null);
-    await initiateCallMutation.mutateAsync({
-      leadId: id,
-      followupId: followupId || null,
-    });
-    void refetchCalls();
+    setCallActionError(null);
+    try {
+      await initiateCallMutation.mutateAsync({
+        leadId: id,
+        followupId: followupId || null,
+      });
+      void refetchCalls();
+    } catch (error) {
+      setCallActionError(
+        getApiErrorMessage(
+          error,
+          "Failed to start the call. Please try again.",
+        ),
+      );
+    }
   };
 
   const handleSaveCallContext = async (call: LeadCall) => {
@@ -1125,6 +1141,11 @@ export default function LeadDetailsPage() {
             <span className="text-xs text-slate-400">Tracked via Exotel</span>
           </div>
           <div className="p-4 sm:p-5 space-y-3">
+            {callActionError ? (
+              <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                {callActionError}
+              </div>
+            ) : null}
             <button
               type="button"
               onClick={() => void handleInitiateCall(null)}

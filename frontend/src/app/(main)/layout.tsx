@@ -49,12 +49,15 @@ export default function MainLayout({
     },
   ];
 
-  if (user?.role === "ADMIN") {
+  if (user?.role === "ADMIN" || user?.role === "EXECUTIVE") {
     navItems.push({
       label: "Leads",
       href: "/leads",
       icon: <Users className="w-5 h-5" />,
     });
+  }
+
+  if (user?.role === "ADMIN") {
     navItems.push({
       label: "Executives",
       href: "/executives",
