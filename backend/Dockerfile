@@ -1,41 +1,44 @@
-# ─── Build stage ─────────────────────────────────────────────────────────────
-FROM node:22-alpine AS builder
+FROM node:22-bookworm-slim AS deps
 
 WORKDIR /app
 
-# Install dependencies
-COPY package.json pnpm-lock.yaml* ./
-RUN npm install -g pnpm && pnpm install --frozen-lockfile
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
 
-# Copy source and compile TypeScript
+FROM node:22-bookworm-slim AS build
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
 COPY tsconfig.json ./
-COPY src/ ./src/
-RUN pnpm build
+COPY src ./src
+COPY migrations ./migrations
+RUN npm run build
 
-# ─── Production stage ─────────────────────────────────────────────────────────
-FROM node:22-alpine AS runner
+FROM node:22-bookworm-slim AS runtime
 
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Non-root user for security
-RUN addgroup --system --gid 1001 nodejs \
- && adduser  --system --uid 1001 apiuser
+RUN groupadd -g 1001 nodejs \
+  && useradd -m -u 1001 -g nodejs appuser
 
-# Install production dependencies only
-COPY package.json pnpm-lock.yaml* ./
-RUN npm install -g pnpm && pnpm install --frozen-lockfile --prod
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/migrations ./migrations
+COPY package.json ./
 
-# Copy compiled output and migrations
-COPY --from=builder /app/dist ./dist
-COPY migrations/ ./migrations/
+RUN mkdir -p /app/uploads/leads \
+  && chown -R appuser:nodejs /app
 
-USER apiuser
+USER appuser
 
 EXPOSE 4000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget -qO- http://localhost:4000/api/health || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD node -e "require('http').get('http://127.0.0.1:4000/api/health',res=>process.exit(res.statusCode===200?0:1)).on('error',()=>process.exit(1))"
 
 CMD ["node", "dist/index.js"]
