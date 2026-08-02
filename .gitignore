@@ -1,0 +1,6 @@
+*.md
+*.xlsx
+*node_modules
+*.next
+*.env
+*.dist

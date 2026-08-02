@@ -1,0 +1,60 @@
+version: '3.9'
+
+services:
+  # ─── PostgreSQL ─────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: sakar_crm_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sakar_crm
+      POSTGRES_USER: sakar_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-change_this_in_production}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations/001_initial_schema.sql:/docker-entrypoint-initdb.d/001_initial_schema.sql:ro
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U sakar_user -d sakar_crm']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ─── API ────────────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sakar_crm_api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: sakar_crm
+      DB_USER: sakar_user
+      DB_PASSWORD: ${DB_PASSWORD:-change_this_in_production}
+      DB_POOL_MAX: 20
+      DB_IDLE_TIMEOUT_MS: 30000
+      DB_CONNECTION_TIMEOUT_MS: 2000
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+    ports:
+      - '4000:4000'
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:4000/api/health || exit 1']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  postgres_data:
+    driver: local
