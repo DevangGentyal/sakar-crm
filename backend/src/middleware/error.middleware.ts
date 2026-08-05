@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 import { validationResult } from "express-validator";
 import { sendError } from "../utils/apiResponse";
+import { isAppError } from "../utils/appError";
 import { env } from "../config/env";
 import { logError } from "../utils/logger";
 import multer from "multer";

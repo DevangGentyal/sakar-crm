@@ -2,14 +2,14 @@ FROM node:22-bookworm-slim AS deps
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+COPY package*.json ./
 RUN npm ci
 
 FROM node:22-bookworm-slim AS build
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+COPY package*.json ./
 RUN npm ci
 
 COPY next.config.mjs ./
@@ -17,7 +17,6 @@ COPY tsconfig.json ./
 COPY postcss.config.mjs ./
 COPY components.json ./
 COPY src ./src
-COPY public ./public
 RUN npm run build
 
 FROM node:22-bookworm-slim AS runtime
