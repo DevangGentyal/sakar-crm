@@ -17,6 +17,7 @@ COPY tsconfig.json ./
 COPY postcss.config.mjs ./
 COPY components.json ./
 COPY src ./src
+COPY src/public ./public
 RUN npm run build
 
 FROM node:22-bookworm-slim AS runtime
