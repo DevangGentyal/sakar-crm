@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
 import { hashPassword } from "../utils/hash";
+import { logError } from "../utils/logger";
 import {
   createCompanyWithAdmin,
   listCompanies,
@@ -8,6 +9,7 @@ import {
   setCompanyRegistrationPassword,
   setCompanyStatus,
 } from "../repositories/company.repository";
+import { mailService } from "./mail.service";
 
 export async function getCompanies() {
   return listCompanies();
@@ -32,12 +34,34 @@ export async function createCompanyWithAdminAccount(input: {
   adminPassword: string;
   executiveRegistrationPassword?: string | null;
 }) {
-  return createCompanyWithAdmin({
+  const adminPasswordHash = await hashPassword(input.adminPassword);
+  const company = await createCompanyWithAdmin({
     ...input,
+    adminPasswordHash,
     executiveRegistrationPasswordHash: input.executiveRegistrationPassword
       ? await hashPassword(input.executiveRegistrationPassword)
       : null,
   });
+
+  void mailService
+    .sendCompanyWelcomeEmail({
+      companyName: company.company_name,
+      companyCode: company.company_code,
+      companyEmail: company.email ?? input.adminEmail,
+      adminEmail: input.adminEmail,
+      adminPassword: input.adminPassword,
+      executiveRegistrationPassword: input.executiveRegistrationPassword ?? "Not set",
+    })
+    .catch((error) => {
+      logError("Company welcome email failed after creation", {
+        companyId: company.id,
+        companyName: company.company_name,
+        adminEmail: input.adminEmail,
+        message: error instanceof Error ? error.message : String(error),
+      });
+    });
+
+  return company;
 }
 
 export async function activateCompany(companyId: string) {

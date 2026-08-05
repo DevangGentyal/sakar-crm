@@ -9,6 +9,7 @@ export type AppErrorCode =
   | "FILE_TYPE_NOT_ALLOWED"
   | "STORAGE_ERROR"
   | "DATABASE_ERROR"
+  | "NO_LEAD_CHANGES"
   | "INTERNAL_ERROR";
 
 export class AppError extends Error {

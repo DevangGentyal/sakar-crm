@@ -7,7 +7,7 @@
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "migrate": "psql $DATABASE_URL -f migrations/001_initial_schema.sql && psql $DATABASE_URL -f migrations/002_lead_followups_and_roles.sql && psql $DATABASE_URL -f migrations/003_admin_executive_only.sql && psql $DATABASE_URL -f migrations/004_lead_history_changed_fields.sql && psql $DATABASE_URL -f migrations/005_lead_calls.sql && psql $DATABASE_URL -f migrations/008_lead_call_enhancements.sql",
+    "migrate": "psql $DATABASE_URL -f migrations/001_initial_schema.sql && psql $DATABASE_URL -f migrations/002_lead_followups_and_roles.sql && psql $DATABASE_URL -f migrations/003_admin_executive_only.sql && psql $DATABASE_URL -f migrations/004_lead_history_changed_fields.sql && psql $DATABASE_URL -f migrations/005_lead_calls.sql && psql $DATABASE_URL -f migrations/008_lead_call_enhancements.sql && psql $DATABASE_URL -f migrations/010_company_type.sql",
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {
@@ -21,8 +21,9 @@
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.0",
     "multer": "^2.2.0",
-    "sharp": "^0.33.5",
+    "nodemailer": "^6.10.1",
     "pg": "^8.22.0",
+    "sharp": "^0.33.5",
     "uuid": "^11.1.0",
     "xlsx": "^0.18.5"
   },
@@ -34,6 +35,7 @@
     "@types/morgan": "^1.9.9",
     "@types/multer": "^2.2.0",
     "@types/node": "^22.15.3",
+    "@types/nodemailer": "^8.0.1",
     "@types/pg": "^8.11.10",
     "@types/uuid": "^10.0.0",
     "ts-node-dev": "^2.0.0",

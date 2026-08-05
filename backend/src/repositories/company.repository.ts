@@ -1,5 +1,4 @@
 import { query } from "../config/db";
-import { hashPassword } from "../utils/hash";
 
 export interface CompanyRow {
   id: string;
@@ -136,7 +135,7 @@ export async function createCompanyWithAdmin(input: {
   adminName: string;
   adminEmail: string;
   adminMobile?: string | null;
-  adminPassword: string;
+  adminPasswordHash: string;
   executiveRegistrationPasswordHash?: string | null;
 }): Promise<CompanyRow> {
   const company = await createCompany({
@@ -151,7 +150,6 @@ export async function createCompanyWithAdmin(input: {
     registrationPasswordHash: input.executiveRegistrationPasswordHash ?? null,
   });
 
-  const passwordHash = await hashPassword(input.adminPassword);
   await query(
     `INSERT INTO users (
        company_id, name, email, mobile_number, password_hash, role, approval_status, is_active, must_change_password
@@ -161,7 +159,7 @@ export async function createCompanyWithAdmin(input: {
       input.adminName,
       input.adminEmail,
       input.adminMobile ?? null,
-      passwordHash,
+      input.adminPasswordHash,
     ],
   );
 

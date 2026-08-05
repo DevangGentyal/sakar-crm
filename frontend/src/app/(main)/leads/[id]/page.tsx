@@ -133,6 +133,13 @@ const isToday = (value: string): boolean => {
   return date.toDateString() === today.toDateString();
 };
 
+const sortFollowupsByClosestDate = (items: LeadFollowUp[]): LeadFollowUp[] =>
+  [...items].sort(
+    (left, right) =>
+      new Date(left.followupDate).getTime() -
+      new Date(right.followupDate).getTime(),
+  );
+
 // ─── Sub Components ────────────────────────────────────────────────────────────
 
 interface InfoItemProps {
@@ -666,7 +673,7 @@ export default function LeadDetailsPage() {
 
   useEffect(() => {
     if (pendingFollowupRefresh) return;
-    setDisplayFollowups(followups);
+    setDisplayFollowups(sortFollowupsByClosestDate(followups));
   }, [followups, pendingFollowupRefresh]);
 
   useEffect(() => {
@@ -729,10 +736,12 @@ export default function LeadDetailsPage() {
 
   const handleFollowupToggle = (followup: LeadFollowUp, completed: boolean) => {
     setDisplayFollowups((current) =>
-      current.map((item) =>
-        item.id === followup.id
-          ? { ...item, status: completed ? "BOOKED" : undefined }
-          : item,
+      sortFollowupsByClosestDate(
+        current.map((item) =>
+          item.id === followup.id
+            ? { ...item, status: completed ? "BOOKED" : undefined }
+            : item,
+        ),
       ),
     );
     setAnimatingFollowupId(followup.id);
@@ -1052,7 +1061,7 @@ export default function LeadDetailsPage() {
               </button>
             </form>
             <div className="space-y-3">
-              {displayFollowups.map((followup) => {
+              {sortFollowupsByClosestDate(displayFollowups).map((followup) => {
                 const shouldHighlight =
                   isToday(followup.followupDate) &&
                   (followup.status ?? "").toUpperCase() !== "BOOKED";
