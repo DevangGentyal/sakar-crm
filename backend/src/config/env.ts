@@ -29,6 +29,7 @@ export const env = {
     optional("DB_CONNECTION_TIMEOUT_MS", "2000"),
     10,
   ),
+  DB_SSL: optional("DB_SSL", "true") === "true",
 
   JWT_SECRET: required("JWT_SECRET"),
   JWT_EXPIRES_IN: optional("JWT_EXPIRES_IN", "7d"),
