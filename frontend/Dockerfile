@@ -18,7 +18,8 @@ COPY postcss.config.mjs ./
 COPY components.json ./
 COPY src ./src
 COPY src/public ./public
-COPY .env .env
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 RUN npm run build
 
 FROM node:22-bookworm-slim AS runtime
