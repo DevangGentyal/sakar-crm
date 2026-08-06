@@ -1,0 +1,89 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sakar-crm-backend-prod
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      DB_POOL_MAX: ${DB_POOL_MAX}
+      DB_IDLE_TIMEOUT_MS: ${DB_IDLE_TIMEOUT_MS}
+      DB_CONNECTION_TIMEOUT_MS: ${DB_CONNECTION_TIMEOUT_MS}
+
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      REGISTRATION_PASSWORD: ${REGISTRATION_PASSWORD}
+
+      SMTP_EMAIL: ${SMTP_EMAIL}
+      SMTP_APP_PASSWORD: ${SMTP_APP_PASSWORD}
+
+      STORAGE_PROVIDER: ${STORAGE_PROVIDER}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL}
+
+      AWS_REGION: ${AWS_REGION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET}
+    ports:
+      - "4000:4000"
+    volumes:
+      - uploads_data:/app/uploads
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "require(''http'').get(''http://127.0.0.1:4000/api/health'',res=>process.exit(res.statusCode===200?0:1)).on(''error'',()=>process.exit(1))"',
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - crm-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sakar-crm-frontend-prod
+    restart: always
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "require(''http'').get(''http://127.0.0.1:3000'',res=>process.exit(res.statusCode===200?0:1)).on(''error'',()=>process.exit(1))"',
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - crm-network
+
+volumes:
+  uploads_data:
+
+networks:
+  crm-network:
+    driver: bridge
