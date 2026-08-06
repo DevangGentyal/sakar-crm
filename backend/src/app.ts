@@ -17,9 +17,23 @@ app.use(
     contentSecurityPolicy: false,
   }),
 );
+
+const allowedOrigins = env.CORS_ORIGIN.split(",").map((o) => o.trim());
+
 app.use(
   cors({
-    origin: env.CORS_ORIGIN,
+    origin: (origin, callback) => {
+      // Allow requests without an Origin (Postman, curl, server-to-server)
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      callback(new Error("Not allowed by CORS"));
+    },
     methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS", "PUT"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
