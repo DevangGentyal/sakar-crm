@@ -1,10 +1,12 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 export function getApiOrigin(): string {
   try {
     return new URL(API_BASE_URL).origin;
   } catch {
-    return typeof window !== "undefined" ? window.location.origin : "http://localhost:4000";
+    return typeof window !== "undefined"
+      ? window.location.origin
+      : "http://localhost:4000";
   }
 }
 
