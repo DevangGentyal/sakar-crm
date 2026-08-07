@@ -124,6 +124,9 @@ export async function initiateExotelCall(input: {
     customFieldPresent: Boolean(input.customField),
   });
 
+  console.log("Endpoint:", endpoint);
+  console.log("Body:", body.toString());
+
   const response = await fetch(endpoint, {
     method: "POST",
     headers: {
@@ -154,6 +157,14 @@ export async function initiateExotelCall(input: {
   const payload: ExotelConnectResponse = parsed?.TwilioResponse ?? parsed ?? {};
 
   if (!response.ok) {
+    console.error("========== EXOTEL ERROR ==========");
+    console.error("Status:", response.status);
+    console.error("Status Text:", response.statusText);
+    console.error("Raw Response:", rawResponse);
+    console.error("Parsed:", JSON.stringify(payload, null, 2));
+    console.error("Endpoint:", endpoint);
+    console.error("==================================");
+
     const errorMessage =
       payload?.RestException?.Message ||
       payload?.Message ||
