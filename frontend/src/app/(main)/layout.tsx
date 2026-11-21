@@ -1,30 +1,39 @@
 "use client";
 
 import React from "react";
-import { Home, Users, Building2, CreditCard, SlidersHorizontal } from "lucide-react";
+import {
+  Home,
+  Users,
+  Building2,
+  CreditCard,
+  SlidersHorizontal,
+  Plug,
+} from "lucide-react";
 import { Sidebar, Navbar } from "@/src/components/layout";
 import { useCurrentUser, useLogout } from "@/src/hooks";
 import { usePathname, useRouter } from "next/navigation";
+import { getAuthToken } from "@/src/services/client";
 
 export default function MainLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [hasStoredSession] = React.useState(() => Boolean(getAuthToken()));
   const {
     data: user,
     isLoading: userLoading,
     isError,
-  } = useCurrentUser({ enabled: true });
+  } = useCurrentUser({ enabled: hasStoredSession });
   const logoutMutation = useLogout();
   const router = useRouter();
   const pathname = usePathname();
 
   React.useEffect(() => {
-    if (isError) {
-      router.push("/login");
+    if (!hasStoredSession || isError) {
+      router.replace("/login");
     }
-  }, [isError, router]);
+  }, [hasStoredSession, isError, router]);
 
   React.useEffect(() => {
     if (user?.role === "SUPER_ADMIN" && pathname.startsWith("/leads")) {
@@ -63,6 +72,11 @@ export default function MainLayout({
       href: "/executives",
       icon: <SlidersHorizontal className="w-5 h-5" />,
     });
+    navItems.push({
+      label: "Meta Lead Ads",
+      href: "/integrations/meta",
+      icon: <Plug className="w-5 h-5" />,
+    });
   }
 
   if (user?.role === "SUPER_ADMIN") {
@@ -80,6 +94,11 @@ export default function MainLayout({
       label: "Manage Plans",
       href: "/plans",
       icon: <SlidersHorizontal className="w-5 h-5" />,
+    });
+    navItems.push({
+      label: "Meta Integration",
+      href: "/meta-integration",
+      icon: <Plug className="w-5 h-5" />,
     });
   }
 

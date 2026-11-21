@@ -1,13 +1,13 @@
 {
-  "name": "sakar-crm-backend",
+  "name": "karyaa-crm-backend",
   "version": "1.0.0",
-  "description": "SAKAR CRM - Production Backend API",
+  "description": "KARYAA CRM - Production Backend API",
   "main": "dist/index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "migrate": "psql $DATABASE_URL -f migrations/001_initial_schema.sql && psql $DATABASE_URL -f migrations/002_lead_followups_and_roles.sql && psql $DATABASE_URL -f migrations/003_admin_executive_only.sql && psql $DATABASE_URL -f migrations/004_lead_history_changed_fields.sql && psql $DATABASE_URL -f migrations/005_lead_calls.sql && psql $DATABASE_URL -f migrations/008_lead_call_enhancements.sql && psql $DATABASE_URL -f migrations/010_company_type.sql",
+    "migrate": "for file in migrations/*.sql; do psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -f \"$file\" || exit 1; done",
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {

@@ -6,7 +6,10 @@ import axios, {
 import { ApiError } from "../types";
 import { mockUser, mockLeads, mockStats } from "./mock-data";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+const API_BASE_URL =
+  typeof window !== "undefined"
+    ? "/api"
+    : process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 const USE_MOCK_DATA = false; // Disable mock data to connect to the backend
 
 // Create axios instance
@@ -21,10 +24,19 @@ export const apiClient: AxiosInstance = axios.create({
 let authToken: string | null = null;
 
 // Get auth token from localStorage
-const getAuthToken = (): string | null => {
+export const getAuthToken = (): string | null => {
   if (authToken) return authToken;
+  if (typeof window === "undefined") return null;
+
+  const cookieToken = document.cookie
+    .split("; ")
+    .find((item) => item.startsWith("authToken="))
+    ?.slice("authToken=".length);
   const stored =
-    typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+    localStorage.getItem("authToken") ||
+    sessionStorage.getItem("authToken") ||
+    cookieToken ||
+    null;
   if (stored) {
     authToken = stored;
   }
@@ -37,8 +49,12 @@ export const setAuthToken = (token: string | null): void => {
   if (typeof window !== "undefined") {
     if (token) {
       localStorage.setItem("authToken", token);
+      sessionStorage.setItem("authToken", token);
+      document.cookie = `authToken=${encodeURIComponent(token)}; Path=/; Max-Age=${7 * 24 * 60 * 60}; SameSite=Lax${window.location.protocol === "https:" ? "; Secure" : ""}`;
     } else {
       localStorage.removeItem("authToken");
+      sessionStorage.removeItem("authToken");
+      document.cookie = "authToken=; Path=/; Max-Age=0; SameSite=Lax";
     }
   }
 };

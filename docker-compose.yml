@@ -5,7 +5,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: sakar-crm-backend-prod
+    container_name: karyaa-crm-backend-prod
     restart: always
     environment:
       NODE_ENV: production
@@ -38,6 +38,16 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_S3_BUCKET: ${AWS_S3_BUCKET}
 
+      EXOTEL_API_KEY: ${EXOTEL_API_KEY}
+      EXOTEL_API_TOKEN: ${EXOTEL_API_TOKEN}
+      EXOTEL_ACCOUNT_SID: ${EXOTEL_ACCOUNT_SID}
+      EXOTEL_CALLER_ID: ${EXOTEL_CALLER_ID}
+      EXOTEL_REGION: ${EXOTEL_REGION}
+      EXOTEL_STATUS_CALLBACK_URL: ${EXOTEL_STATUS_CALLBACK_URL}
+
+      META_ENCRYPTION_KEY: ${META_ENCRYPTION_KEY:-${JWT_SECRET}}
+      META_GRAPH_API_VERSION: ${META_GRAPH_API_VERSION:-v23.0}
+
     ports:
       - "4000:4000"
     volumes:
@@ -61,7 +71,7 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
-    container_name: sakar-crm-frontend-prod
+    container_name: karyaa-crm-frontend-prod
     restart: always
     depends_on:
       backend:

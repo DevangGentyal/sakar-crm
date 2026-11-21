@@ -53,6 +53,9 @@ export const env = {
   AWS_S3_BUCKET: optional("AWS_S3_BUCKET", ""),
   PUBLIC_BASE_URL: optional("PUBLIC_BASE_URL", "http://localhost:4000"),
 
+  META_ENCRYPTION_KEY: optional("META_ENCRYPTION_KEY", ""),
+  META_GRAPH_API_VERSION: optional("META_GRAPH_API_VERSION", "v23.0"),
+
   isProduction: optional("NODE_ENV", "development") === "production",
   isDevelopment: optional("NODE_ENV", "development") === "development",
 } as const;

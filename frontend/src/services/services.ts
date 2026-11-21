@@ -106,9 +106,9 @@ export const companyService = {
   list: async (): Promise<Company[]> => {
     const response = await apiClient.get<{
       success: boolean;
-      data: Company[];
+      data?: Company[];
     }>("/companies");
-    return response.data.data;
+    return Array.isArray(response.data?.data) ? response.data.data : [];
   },
   create: async (input: {
     companyName: string;
@@ -149,7 +149,9 @@ export const companyService = {
 
 // ============= Lead Services =============
 export const leadService = {
-  uploadLeadPhoto: async (file: File): Promise<{ path: string; url: string | null }> => {
+  uploadLeadPhoto: async (
+    file: File,
+  ): Promise<{ path: string; url: string | null }> => {
     const formData = new FormData();
     formData.append("photo", file);
     const response = await apiClient.post<{

@@ -6,7 +6,12 @@ import adminRoutes from "./admin.routes";
 import companyRoutes from "./company.routes";
 import leadRoutes from "./lead.routes";
 import dashboardRoutes from "./dashboard.routes";
+import metaRoutes from "./meta.routes";
 import { exotelStatusCallbackHandler } from "../controllers/call.controller";
+import {
+  metaWebhookHandler,
+  metaWebhookVerifyHandler,
+} from "../controllers/meta.controller";
 
 const router = Router();
 
@@ -34,6 +39,9 @@ router.use("/companies", companyRoutes);
 router.use("/admin", adminRoutes);
 router.use("/leads", leadRoutes);
 router.use("/dashboard", dashboardRoutes);
+router.use("/meta", metaRoutes);
 router.post("/calls/exotel/status-callback", exotelStatusCallbackHandler);
+router.get("/webhooks/meta/:integrationKey", metaWebhookVerifyHandler);
+router.post("/webhooks/meta/:integrationKey", metaWebhookHandler);
 
 export default router;

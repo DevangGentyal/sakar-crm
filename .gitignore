@@ -6,3 +6,8 @@
 *.dist
 *.pem
 *.sql
+.ngrok-*.log
+.ngrok-*.pid
+.ngrok-karyaa.yml
+.ngrok.pid
+.ngrok.log

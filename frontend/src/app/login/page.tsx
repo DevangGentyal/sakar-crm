@@ -8,13 +8,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Input, Card } from "@/src/components/ui";
 import { useLogin } from "@/src/hooks";
 import { loginSchema, LoginFormData } from "@/src/utils/validation";
-import { Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, Mail } from "lucide-react";
 import { getApiErrorMessage } from "@/src/utils/api-error";
 
 export default function LoginPage() {
   const router = useRouter();
   const loginMutation = useLogin();
   const [errorMsg, setErrorMsg] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -50,7 +51,7 @@ export default function LoginPage() {
           <span className="text-white font-bold text-2xl">S</span>
         </div>
         <h2 className="text-3xl font-bold tracking-tight text-slate-900">
-          Sign in to SAKAR CRM
+          Sign in to KARYAA CRM
         </h2>
         <p className="mt-2 text-sm text-slate-600">
           Or{" "}
@@ -86,8 +87,24 @@ export default function LoginPage() {
             <div>
               <Input
                 label="Password"
-                type="password"
-                icon={<Lock className="w-5 h-5 text-slate-400" />}
+                type={showPassword ? "text" : "password"}
+                icon={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((visible) => !visible)}
+                    className="inline-flex items-center justify-center text-slate-400 transition-colors hover:text-slate-700 focus:outline-none"
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    aria-pressed={showPassword}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
+                }
                 placeholder="••••••••"
                 error={errors.password?.message}
                 {...register("password")}

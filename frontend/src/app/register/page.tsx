@@ -34,7 +34,7 @@ export default function RegisterPage() {
     companyService
       .list()
       .then((companies) => {
-        setCompanyOptions(companies);
+        setCompanyOptions(Array.isArray(companies) ? companies : []);
       })
       .catch(() => {
         setCompanyOptions([]);
@@ -52,10 +52,7 @@ export default function RegisterPage() {
       );
     } catch (error: any) {
       setErrorMsg(
-        getApiErrorMessage(
-          error,
-          "Registration failed. Please try again.",
-        ),
+        getApiErrorMessage(error, "Registration failed. Please try again."),
       );
     }
   };
@@ -141,11 +138,13 @@ export default function RegisterPage() {
                   defaultValue=""
                 >
                   <option value="">Select a company</option>
-                  {companyOptions.map((company) => (
-                    <option key={company.id} value={company.company_code}>
-                      {company.company_name} ({company.company_code})
-                    </option>
-                  ))}
+                  {(Array.isArray(companyOptions) ? companyOptions : []).map(
+                    (company) => (
+                      <option key={company.id} value={company.company_code}>
+                        {company.company_name} ({company.company_code})
+                      </option>
+                    ),
+                  )}
                 </select>
               </div>
               {errors.companyCode?.message ? (

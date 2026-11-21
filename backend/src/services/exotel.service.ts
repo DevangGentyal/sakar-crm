@@ -98,8 +98,7 @@ export async function initiateExotelCall(input: {
   body.set("CallType", "trans");
   body.set("Record", "true");
 
-  const callbackUrl = input.statusCallbackUrl || env.EXOTEL_STATUS_CALLBACK_URL;
-  console.log("Callback URL:", callbackUrl);
+  const callbackUrl = env.EXOTEL_STATUS_CALLBACK_URL;
   if (callbackUrl) {
     body.set("StatusCallback", callbackUrl);
 
@@ -124,23 +123,30 @@ export async function initiateExotelCall(input: {
     customFieldPresent: Boolean(input.customField),
   });
 
-  console.log("Endpoint:", endpoint);
-  console.log("Body:", body.toString());
+  const responseController = new AbortController();
+  const timeout = setTimeout(() => responseController.abort(), 15_000);
 
-  const response = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${auth}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: body.toString(),
-  });
+  let response: Response;
+  try {
+    response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: body.toString(),
+      signal: responseController.signal,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error("Exotel request timed out after 15 seconds");
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
 
   const rawResponse = await response.text();
-
-  console.log("Status:", response.status);
-  // console.log("Response:");
-  // console.log(rawResponse);
 
   let parsed: any = {};
 
@@ -157,14 +163,6 @@ export async function initiateExotelCall(input: {
   const payload: ExotelConnectResponse = parsed?.TwilioResponse ?? parsed ?? {};
 
   if (!response.ok) {
-    console.error("========== EXOTEL ERROR ==========");
-    console.error("Status:", response.status);
-    console.error("Status Text:", response.statusText);
-    console.error("Raw Response:", rawResponse);
-    console.error("Parsed:", JSON.stringify(payload, null, 2));
-    console.error("Endpoint:", endpoint);
-    console.error("==================================");
-
     const errorMessage =
       payload?.RestException?.Message ||
       payload?.Message ||

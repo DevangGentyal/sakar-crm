@@ -144,7 +144,7 @@ export async function importLeads(
     // rows are not visible to a second SELECT in the same transaction.
     const firstLeadCode = await generateLeadCode(client);
     const codeMatch = firstLeadCode.match(/^(.*-)(\d+)$/);
-    const codePrefix = codeMatch?.[1] ?? "SAKAR-";
+    const codePrefix = codeMatch?.[1] ?? "KARYAA-";
     const firstSequence = codeMatch ? Number(codeMatch[2]) : 1;
     for (const lead of insertable) {
       const projectId = /^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}$/.test(lead.project)
